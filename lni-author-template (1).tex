@@ -1,0 +1,192 @@
+% !TeX document-id = {e96318ba-ee8c-4009-b5ac-484871d58952}
+% !TeX encoding = UTF-8
+% !TeX program = pdflatex
+% !BIB program = bibtex
+
+%%% Um einen Artikel auf deutsch zu schreiben, genügt es die Klasse ohne
+%%% Parameter zu laden.
+\documentclass[english]{lni}
+%%% To write an article in English, please use the option ``english'' in order
+%%% to get the correct hyphenation patterns and terms.
+%%% \documentclass[english]{class}
+%%
+
+\usepackage{draftwatermark}
+\usepackage[]{draftwatermark} % nur erste Seite
+\SetWatermarkText{CPS1}
+\SetWatermarkLightness{0.98}            % etwas dunkler als default
+\SetWatermarkScale{0.25}                  % default scale: 1.2
+\begin{document}
+
+\title[Titlel]{Platoon Re-Route with Time-Sensitive Cargo Scenario}
+\author[Mu]{Muhammad Mustafa Qaiser\footnote{ \email{muhammad-mustafa.qaiser@stud.hshl.de}} }
+\startpage{1} % Beginn der Seitenzählung für diesen Beitrag / Start page
+\booktitle{Autonomous A} % Name of book title
+\year{Summer Term 2025}
+
+\maketitle
+\tableofcontents
+
+
+\newpage
+\section{Abstract} 
+Truck platooning enables convoys to drive in a tight formation, improving traffic efficiency and reducing fuel usage. \cite{10933391} There are a multitude of scenarios that may occur in this system. Although it may not be as common as the simple merging scenario, the alternate route scenario is also important to analyze and prepare for, as there may be an obstruction or last minute closure of a road on a pre planned route. This scenario explores how a convoy of platooning trucks reorganize and merge in response to real-time traffic. The emphasis is on decentralized control, inter-vehicle communication and system synchronization. The described approach in modeling with SysML/UML diagrams and UPPAAL. 
+
+\section{Motivation}
+Modern logistics and transport require real-time adaptation to live road conditions and delivery deadlines. Truck platooning provides flexibility. In this situation, reconfiguration is required not due to safety concerns but in an attempt to increase route efficiency. Unlike emergency merges, this requires negotiation, coordination, communication, and minimal human intervention. Studying this case will help evaluate the scalability and operational intelligence of this system.\cite{528248}
+
+\section{Scenario Description}
+Picture a platoon of autonomous freight trucks cruising along a German autobahn. The convoy of three vehicles is running smoothly, each truck following the one ahead, saving fuel and minimizing drag. Then, a real-time alert from the fleet’s logistics cloud service arrives.
+The message is clear: there's an unexpected slowdown 15 kilometers ahead, likely caused by lane closures and early commuter traffic. If the trucks continue on their original route, they will hit the congestion head-on, lose precious time, and burn more fuel idling in traffic.
+Instead, the system recommends a detour via a secondary highway that has recently cleared up which is shorter, faster, and more fuel-efficient. However, to take full advantage of this alternate route, the platoon will need to reorganize. The truck currently at the rear carries a time-sensitive load that would benefit from taking the middle position. What was supposed to be a steady journey now turns into a live reconfiguration operation, with trucks needing to reshuffle positions and reassign roles while in motion.
+This scenario tests the trucks’ ability to communicate, negotiate roles, and execute dynamic restructuring without stopping or interfering with other highway users.
+
+\section{Requirements for Rerouting and Reorganizing}
+
+\subsection{Trigger and Notification}
+-The fleet management system detects a delay on the current route.
+-Sends a reconfiguration order to the platoon's vehicles
+
+
+\subsection{Merge Intent and Broadcast}
+-Lead truck broadcasts updated route data and reconfiguration proposal to the other trucks in the platoon. This includes the suggested new roles ( Truck 3 → Middle) and estimated time to initiate the maneuver.
+
+\subsection{Decentralized Acceptance}
+-Each truck accepts the proposal:
+-Confirms feasibility (enough space, speed compatibility).
+-Responds with a positive or negative signal.
+
+If any vehicle cannot comply, default logic kicks in (keep current formation, reroute solo).
+
+
+\subsection{Gap Creation and Positioning}
+-Trucks initiate lateral and longitudinal adjustments:
+
+-Current leader continues driving.
+
+-Middle truck slows down to open a safe gap.
+
+-Merging truck changes lanes to overtake
+
+-Platoon temporarily expands inter-vehicle spacing.
+
+
+\subsection{Role Reassignment}
+-Once the new truck reaches the Middle, it assumes secondary status.
+
+-Control algorithms change with the new configuration in mind
+
+
+\subsection{Confirmation and Execution}
+-All trucks confirm new formation is stable.
+
+-Fleet server logs the successful reconfiguration.
+
+-Platoon reroutes via the optimized path.
+
+
+\section{Post-Merge Stabilization}
+-Trucks reduce gaps back to fuel-efficient intervals.
+
+-System resumes normal platoon cruising mode.
+
+\section{Timing Behavior}
+
+Merge execution relies on tight timing:
+T0–T2 sec: Merge intent broadcast and negotiation.
+
+
+T3–T8 sec: Truck C changes lanes to overtake
+
+
+T7-T15 sec: Truck B slows down
+
+
+T-16-T25 sec: Truck C merges into the gap and takes middle position
+
+Timers are embedded in each truck's local controller, verified by synchronized clocks via GPS
+
+
+
+\section{Diagrams}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{Template/Requirements_Diagram_Truck_Scenario.png}
+    \caption{Requirements Diagram}
+    \label{fig:enter-label}
+\end{figure}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{Template/Sequence_Diagram_Truck_Scenario.png}
+    \caption{Sequence Diagram}
+    \label{fig:enter-label}
+\end{figure}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{Template/State_Diagram_Leader_Truck.png}
+    \caption{Lead Truck State Diagram}
+\begin{figure}
+    \centering
+        \includegraphics[width=0.5\linewidth]{Template/State_Diagram_Middle_truck.png}
+        \caption{Middle Truck State Diagram}
+        \label{fig:enter-label}
+    \end{figure}
+        \label{fig:enter-label}
+\end{figure}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{Template/Sate_diagram_Merging_Truck.png}
+    \caption{Merging Truck State Diagram}
+    \label{fig:enter-label}
+\end{figure}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{Template/BDD_Truck_Scenario.png}
+    \caption{Block Definition Diagram}
+    \label{fig:enter-label}
+\end{figure}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{Template/Activity_Diagram_Truck_Scenario.png}
+    \caption{Activity Diagram}
+    \label{fig:enter-label}
+\end{figure}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{Template/UPPAAL Diagram.png}
+    \caption{UPPAAL Diagrams}
+    \label{fig:enter-label}
+\end{figure}
+
+
+\section{Conclusion}
+
+This scenario illustrates how truck platoons can dynamically reorganize not just for safety, but for operational efficiency. Key enablers include decentralized control, real-time inter-vehicle communication, and system-level orchestration. Modeling this scenario with timed automata provides a foundation for formal verification under real-world constraints. As platooning systems evolve, reconfiguration use cases such as this will be essential for intelligent, adaptable logistics networks.
+
+
+
+\bibliographystyle{ieee}
+\bibliography{Template/mybibfile}
+
+
+
+
+
+\section{Declaration of Originality}
+
+I, Muhammad Mustafa Qaiser, herewith declare that I have composed the present paper and work by myself and without the use of any other than the cited sources and aids. Sentences or parts of sentences quoted literally are marked as such; other references with regard to the statement and scope are indicated by full details of the publications concerned. The paper and work in the same or similar form have not been submitted to any examination body and have not been published. This paper was not yet, even in part, used in another examination or as a course performance. I agree that my work may be checked by a plagiarism checker. \\~\\
+
+
+
+
+\hspace*{\fill}\begin{tabular}{@{}l@{}}\hline
+	\makebox[10cm]{30/05/2025, Lippstadt - Muhammad Mustafa Qaiser}
+\end{tabular}
+
+%%% Angabe der .bib-Datei (ohne Endung) / State .bib file (for BibTeX usage)  
+
+
+
+
+\end{document}
