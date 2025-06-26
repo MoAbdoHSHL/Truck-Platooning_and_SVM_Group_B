@@ -13,7 +13,7 @@ upper_green = np.array([90, 255, 255])
 lower_blue = np.array([85, 10, 150])
 upper_blue = np.array([115, 150, 255])
 
-x = 0.5 # scale factor for steering values
+x = 0.3 # scale factor for steering values
 pred_to_steer_value = {
     -1.0: -1*x, 
      0.0: 0*x,
@@ -33,13 +33,9 @@ def predict_steering(img):
     if not hasattr(predict_steering, "_model"):
         model_path = MODEL_PATH
         if not os.path.isfile(model_path):
-            print(f"[WARN] SVM file '{model_path}' not found ")
             predict_steering._model = None
         else:
             predict_steering._model = joblib.load(model_path)
-            print(f"[INFO] Loaded SVM from '{model_path}'")
-
-    # Convert CARLA image to NumPy array
     img_np = np.frombuffer(img.raw_data, dtype=np.uint8)
     img_np = img_np.reshape((img.height, img.width, 4))  
     img_bgr = img_np[:, :, :3]
@@ -48,22 +44,19 @@ def predict_steering(img):
     mask_blue = cv2.inRange(img_hsv, lower_blue, upper_blue)
     combined_mask = cv2.bitwise_or(mask_green, mask_blue)
     height, width = combined_mask.shape
-    bottom_quarter = combined_mask[int(height * 0.75):, :]
-    resized = cv2.resize(bottom_quarter, IMAGE_SIZE)
+    bottom_half = combined_mask[int(height * 0.5):, :]
+    resized = cv2.resize(bottom_half, IMAGE_SIZE)
     features = resized.flatten().reshape(1, -1)
     model = predict_steering._model
     pred_clipped = 0.0
-
     if model is not None:
         try:
             pred = float(model.predict(features)[0])
         except Exception as e:
             pred = 0.0
             print(f"[ERR] SVM predict failed: {e}")
-
         pred_clipped = pred_to_steer_value.get(pred, 0.0)
         print(f"SVM steering prediction: {pred_clipped:.3f}")
-
     return pred_clipped
 # -----------------------------------------------------------------
 def parent_of(actor):
@@ -105,6 +98,7 @@ def main():
     print("Using camera id=%d for live feed" % camera.id)
 
     state = {"frames": 0, "first_ts": None, "latest_img": None}
+    prev_steer = [DEFAULT_STEER]  # Use a list to allow modification inside loop
 
     def cam_cb(img):
         state["latest_img"] = img
@@ -122,12 +116,15 @@ def main():
         while True:
             img = state["latest_img"]
             if img is not None:
-                steer = float(max(-1.0, min(1.0, predict_steering(img))))
+                steer_raw = float(max(-1.0, min(1.0, predict_steering(img))))
+                # Smooth steering for high speed
+                alpha = 0.3
+                steer = alpha * steer_raw + (1 - alpha) * prev_steer[0]
+                prev_steer[0] = steer
             else:
                 steer = DEFAULT_STEER  
-            vehicle.apply_control(carla.VehicleControl(throttle=THROTTLE,
-                                                       steer=steer))
-            time.sleep(0.01)  
+            vehicle.apply_control(carla.VehicleControl(throttle=THROTTLE, steer=steer))
+            time.sleep(0.005)  # Faster control loop for higher speed
 
     except KeyboardInterrupt:
         print("\nStopping.")

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.6//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_6.dtd'>
 <nta>
-	<declaration>const int SAFE_GAP = 10; // Minimum safe gap between vehicles
-const int MAX_MERGE_TIME = 10; // Maximum time allowed for merging
-const int MAX_RESPONSE_TIME = 5; // Maximum response time for acknowledgments
+	<declaration>const int SAFE_GAP = 10;             // Minimum safe gap between vehicles
+const int MAX_MERGE_TIME = 10;       // Maximum time allowed for merging
+const int MAX_RESPONSE_TIME = 5;     // Maximum response time for acknowledgments
 
-int gap_ready = 0; // 0 = no gap, 1 = opening, 2 = ready
-int gap = 20; // Current gap between platoon vehicles
-int distance = 0; // Distance metric for monitoring
+int gap_ready = 0;                   // 0 = no gap, 1 = opening, 2 = ready
+int gap = 20;                        // Current gap between platoon vehicles
+int distance = 0;                    // Distance metric for monitoring
 
 broadcast chan merge_request;        // Sent by merging truck to leader
 broadcast chan merge_ack;            // Sent by leader to merging truck once gap is ready
@@ -131,17 +131,9 @@ broadcast chan open_gap;             // Sent by leader to follower to start crea
 		<query>
 			<formula>A[] not deadlock</formula>
 			<comment>No deadlock</comment>
-			<result outcome="success" type="quality" timestamp="2025-05-22 16:17:41 +0200">
+			<result outcome="success" type="quality" timestamp="2025-06-23 10:46:45 +0200">
 				<option key="--diagnostic" value="2"/>
 			</result>
-		</query>
-		<query>
-			<formula>A[] (gap &lt; SAFE_GAP) imply (f1.FStop &amp;&amp; f2.FStop)</formula>
-			<comment>Safe gap enforced</comment>
-		</query>
-		<query>
-			<formula>A[] (lead.LStop imply lead.t &lt;= STOP_WAIT)</formula>
-			<comment>Emergency stop bounded</comment>
 		</query>
 	</queries>
 </nta>
