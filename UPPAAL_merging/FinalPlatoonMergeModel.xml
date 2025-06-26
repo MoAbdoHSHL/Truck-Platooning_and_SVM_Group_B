@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.6//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_6.dtd'>
+<nta>
+	<declaration>
+        const int SAFE_GAP  = 10;  
+        const int STOP_WAIT = 5;   
+        int distance = 0;  
+        int gap      = 20; 
+        int nr       = 0;
+        broadcast chan lane;   
+        broadcast chan stop;   
+        broadcast chan resume; 
+    </declaration>
+	<template>
+		<name>Environment</name>
+		<location id="id0" x="-102" y="0">
+			<name x="-153" y="-8">Pick</name>
+		</location>
+		<location id="id1" x="331" y="0">
+			<name x="360" y="-8">Wait</name>
+		</location>
+		<location id="id2" x="127" y="59">
+			<name x="93" y="76">NewRoute</name>
+		</location>
+		<init ref="id0"/>
+		<transition id="id3">
+			<source ref="id0"/>
+			<target ref="id1"/>
+			<label kind="select" x="25" y="-34">d:int[1,40], g:int[5,25]</label>
+			<label kind="assignment" x="34" y="8">distance = d, gap = g</label>
+		</transition>
+		<transition id="id4">
+			<source ref="id1"/>
+			<target ref="id2"/>
+			<label kind="guard" x="195" y="51">distance &gt; 35 &amp;&amp; gap &gt; SAFE_GAP</label>
+			<label kind="assignment" x="263" y="25">nr = 1</label>
+		</transition>
+		<transition id="id5">
+			<source ref="id1"/>
+			<target ref="id0"/>
+			<label kind="synchronisation" x="85" y="-102">resume?</label>
+			<nail x="119" y="-76"/>
+		</transition>
+		<transition id="id6">
+			<source ref="id2"/>
+			<target ref="id0"/>
+			<label kind="synchronisation" x="-34" y="42">resume?</label>
+		</transition>
+	</template>
+	<template>
+		<name>Leader</name>
+		<declaration>clock t;</declaration>
+		<location id="id7" x="-136" y="-68">
+			<name x="-153" y="-51">Idle</name>
+		</location>
+		<location id="id8" x="365" y="-76">
+			<name x="391" y="-93">LaneChange</name>
+		</location>
+		<location id="id9" x="136" y="0">
+			<name x="93" y="17">EmergencyStop</name>
+			<label kind="invariant" x="93" y="42">t &lt;= STOP_WAIT</label>
+		</location>
+		<init ref="id7"/>
+		<transition id="id10">
+			<source ref="id7"/>
+			<target ref="id7"/>
+			<label kind="guard" x="-187" y="-144">distance &gt; 35 &amp;&amp; t &gt; 180</label>
+			<label kind="synchronisation" x="-170" y="-127">resume!</label>
+			<nail x="-166" y="-98"/>
+			<nail x="-106" y="-98"/>
+		</transition>
+		<transition id="id11">
+			<source ref="id7"/>
+			<target ref="id8"/>
+			<label kind="guard" x="0" y="-187">(distance &gt; 15) &amp;&amp; (distance &lt;= 35)</label>
+			<label kind="synchronisation" x="102" y="-170">lane!</label>
+			<nail x="127" y="-144"/>
+		</transition>
+		<transition id="id12">
+			<source ref="id7"/>
+			<target ref="id9"/>
+			<label kind="guard" x="-93" y="-25">distance &lt;= 15</label>
+			<label kind="synchronisation" x="-34" y="0">stop!</label>
+			<label kind="assignment" x="-8" y="17">t = 0</label>
+		</transition>
+		<transition id="id13">
+			<source ref="id9"/>
+			<target ref="id8"/>
+			<label kind="guard" x="255" y="-34">t &gt;= STOP_WAIT</label>
+			<label kind="synchronisation" x="272" y="-17">lane!</label>
+		</transition>
+		<transition id="id14">
+			<source ref="id8"/>
+			<target ref="id7"/>
+			<label kind="synchronisation" x="110" y="-102">resume!</label>
+		</transition>
+	</template>
+	<template>
+		<name>Follower1</name>
+		<declaration>clock t;</declaration>
+		<location id="id15" x="-68" y="-42">
+			<name x="-51" y="-59">Idle</name>
+		</location>
+		<location id="id16" x="-335" y="95">
+			<name x="-382" y="110">LaneChange</name>
+		</location>
+		<location id="id17" x="34" y="93">
+			<name x="0" y="110">EmergencyStop</name>
+		</location>
+		<location id="id18" x="-348" y="-102">
+			<name x="-442" y="-110">SlowDown</name>
+			<label kind="invariant" x="-450" y="-85">t &lt;= STOP_WAIT</label>
+		</location>
+		<init ref="id15"/>
+		<transition id="id19">
+			<source ref="id15"/>
+			<target ref="id18"/>
+			<label kind="guard" x="-212" y="-102">nr == 1</label>
+			<label kind="assignment" x="-187" y="-85">t = 0</label>
+		</transition>
+		<transition id="id20">
+			<source ref="id18"/>
+			<target ref="id15"/>
+			<label kind="assignment" x="-246" y="-153">nr = 0</label>
+			<nail x="-153" y="-136"/>
+		</transition>
+		<transition id="id21">
+			<source ref="id15"/>
+			<target ref="id16"/>
+			<label kind="guard" x="-204" y="25">gap &gt; SAFE_GAP</label>
+			<label kind="synchronisation" x="-238" y="51">lane?</label>
+		</transition>
+		<transition id="id22">
+			<source ref="id16"/>
+			<target ref="id15"/>
+			<label kind="synchronisation" x="-374" y="0">resume?</label>
+			<nail x="-297" y="-17"/>
+		</transition>
+		<transition id="id23">
+			<source ref="id15"/>
+			<target ref="id17"/>
+			<label kind="synchronisation" x="-17" y="8">stop?</label>
+			<label kind="assignment" x="-8" y="25">t = 0</label>
+		</transition>
+		<transition id="id24">
+			<source ref="id17"/>
+			<target ref="id16"/>
+			<label kind="synchronisation" x="-170" y="93">lane?</label>
+		</transition>
+		<transition id="id25">
+			<source ref="id15"/>
+			<target ref="id17"/>
+			<label kind="guard" x="59" y="42">gap &lt; SAFE_GAP</label>
+			<nail x="68" y="-17"/>
+		</transition>
+	</template>
+	<template>
+		<name>Follower2</name>
+		<declaration>clock t;</declaration>
+		<location id="id26" x="-68" y="-142">
+			<name x="-127" y="-153">Idle</name>
+		</location>
+		<location id="id27" x="-68" y="-340">
+			<name x="-102" y="-374">LaneChange</name>
+		</location>
+		<location id="id28" x="306" y="-110">
+			<name x="327" y="-125">EmergencyStop</name>
+		</location>
+		<location id="id29" x="-102" y="59">
+			<name x="-81" y="50">LaneChangeLeft</name>
+			<label kind="invariant" x="-85" y="68">t &lt;= STOP_WAIT</label>
+		</location>
+		<location id="id30" x="-316" y="-76">
+			<name x="-467" y="-85">LaneChangeRight</name>
+			<label kind="invariant" x="-450" y="-59">t &lt;= STOP_WAIT</label>
+		</location>
+		<init ref="id26"/>
+		<transition id="id31">
+			<source ref="id26"/>
+			<target ref="id29"/>
+			<label kind="guard" x="-85" y="-25">nr == 1</label>
+			<label kind="assignment" x="-76" y="-42">t = 0</label>
+		</transition>
+		<transition id="id32">
+			<source ref="id29"/>
+			<target ref="id30"/>
+			<label kind="assignment" x="-229" y="25">t = 0</label>
+		</transition>
+		<transition id="id33">
+			<source ref="id30"/>
+			<target ref="id26"/>
+		</transition>
+		<transition id="id34">
+			<source ref="id26"/>
+			<target ref="id27"/>
+			<label kind="guard" x="-59" y="-238">gap &gt; SAFE_GAP</label>
+			<label kind="synchronisation" x="-59" y="-263">lane?</label>
+		</transition>
+		<transition id="id35">
+			<source ref="id27"/>
+			<target ref="id26"/>
+			<label kind="synchronisation" x="-246" y="-246">resume?</label>
+			<nail x="-272" y="-238"/>
+		</transition>
+		<transition id="id36">
+			<source ref="id26"/>
+			<target ref="id28"/>
+			<label kind="synchronisation" x="85" y="-153">stop?</label>
+			<nail x="-51" y="-144"/>
+			<nail x="289" y="-110"/>
+		</transition>
+		<transition id="id37">
+			<source ref="id28"/>
+			<target ref="id27"/>
+			<label kind="synchronisation" x="136" y="-246">lane?</label>
+		</transition>
+		<transition id="id38">
+			<source ref="id26"/>
+			<target ref="id28"/>
+			<label kind="guard" x="76" y="-17">gap &lt; SAFE_GAP</label>
+			<nail x="110" y="-25"/>
+		</transition>
+	</template>
+	<template>
+		<name>MergingTruck</name>
+		<declaration>clock t;</declaration>
+		<location id="id39" x="-68" y="200">
+			<name x="-127" y="189">Idle</name>
+		</location>
+		<location id="id40" x="200" y="200">
+			<name x="221" y="189">JoinRequest</name>
+		</location>
+		<location id="id41" x="-51" y="119">
+			<name x="10" y="108">PlatoonJoined</name>
+		</location>
+		<location id="id42" x="-68" y="408">
+			<name x="-47" y="397">EmergencyStop</name>
+			<label kind="invariant" x="-78" y="423">t &lt;= STOP_WAIT</label>
+		</location>
+		<init ref="id39"/>
+		<transition id="id43">
+			<source ref="id39"/>
+			<target ref="id40"/>
+			<label kind="guard" x="-59" y="212">distance &gt; 35 &amp;&amp; gap &gt; SAFE_GAP</label>
+		</transition>
+		<transition id="id44">
+			<source ref="id40"/>
+			<target ref="id41"/>
+		</transition>
+		<transition id="id45">
+			<source ref="id41"/>
+			<target ref="id39"/>
+		</transition>
+		<transition id="id46">
+			<source ref="id39"/>
+			<target ref="id42"/>
+			<label kind="guard" x="-289" y="357">gap &lt; SAFE_GAP</label>
+			<label kind="assignment" x="-204" y="374">t = 0</label>
+			<nail x="-212" y="340"/>
+		</transition>
+		<transition id="id47">
+			<source ref="id42"/>
+			<target ref="id39"/>
+			<label kind="guard" x="-51" y="314">t &gt;= STOP_WAIT</label>
+		</transition>
+	</template>
+	<system>env = Environment(); 
+lead = Leader(); 
+f1 = Follower1(); 
+f2 = Follower2(); 
+mt = MergingTruck(); 
+system env, lead, f1, f2, mt;</system>
+	<queries>
+		<query>
+			<formula>A[] not deadlock</formula>
+			<comment>No deadlock</comment>
+			<result outcome="success" type="quality" timestamp="2025-06-26 21:19:35 +0200">
+			</result>
+		</query>
+	</queries>
+</nta>
